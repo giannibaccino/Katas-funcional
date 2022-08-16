@@ -6,6 +6,7 @@ import util.DataUtil;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /*
     Goal: Create a datastructure from the given data:
@@ -63,8 +64,29 @@ public class Kata11 {
         List<Map> boxArts = DataUtil.getBoxArts();
         List<Map> bookmarkList = DataUtil.getBookmarkList();
 
+        return lists.stream()
+                .map(structure -> ImmutableMap.of("name", structure.get("name"),
+                        "videos", videos.stream()
+                                .filter(movies -> movies.get("listId") == structure.get("id"))
+                                .map(movie -> ImmutableMap.of("id", movie.get("listId"),
+                                        "title", movie.get("title"),
+                                        "time", bookmarkList.stream()
+                                                .filter(bookmark -> bookmark.get("videoId") == movie.get("id"))
+                                                .map(bookmark -> bookmark.get("time"))
+                                                .collect(Collectors.toUnmodifiableList()),
+                                        "boxart", boxArts.stream()
+                                                .filter(bookmark -> bookmark.get("videoId") == movie.get("id"))
+                                                .reduce((boxArt, boxArt2) -> (Integer) boxArt.get("height") * (Integer) boxArt.get("width") < (Integer) boxArt2.get("height") * (Integer) boxArt2.get("width") ? boxArt : boxArt2)
+                                                .get()
+                                                .get("url")))
+                                .collect(Collectors.toUnmodifiableList())))
+                .collect(Collectors.toUnmodifiableList());
+
+        /*
         return ImmutableList.of(ImmutableMap.of("name", "someName", "videos", ImmutableList.of(
                 ImmutableMap.of("id", 5, "title", "The Chamber", "time", 123, "boxart", "someUrl")
         )));
+
+         */
     }
 }
